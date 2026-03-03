@@ -41,7 +41,7 @@ type EmailConfig struct {
 	AppURL       string
 }
 
-func load() *Config {
+func Load() *Config {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found")
 	}

@@ -43,7 +43,7 @@ func AbortWithError(c *gin.Context, status int, err string) {
 	})
 }
 
-func domainErrorResponce(c *gin.Context, err error) {
+func domainErrorResponse(c *gin.Context, err error) {
 	switch {
 	case errors.Is(err, domain.ErrUserNotFound):
 		errorResponse(c, http.StatusNotFound, "user not found")

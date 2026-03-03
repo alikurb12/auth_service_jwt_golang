@@ -1,11 +1,10 @@
-package http
+package handler
 
 import (
 	"net/http"
 	"strings"
 
 	"github.com/alikurb12/auth_service_jwt_golang/internal/domain"
-	"github.com/alikurb12/auth_service_jwt_golang/internal/handler"
 	"github.com/alikurb12/auth_service_jwt_golang/internal/infrastructure/jwt"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -20,29 +19,29 @@ func AuthMiddleware(jwtService *jwt.JWTService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
-			handler.AbortWithError(c, http.StatusUnauthorized, "authorization header required")
+			AbortWithError(c, http.StatusUnauthorized, "authorization header required")
 			return
 		}
 
 		parts := strings.SplitN(authHeader, " ", 2)
 		if len(parts) != 2 || !strings.EqualFold(parts[0], "bearer") {
-			handler.AbortWithError(c, http.StatusUnauthorized, "invalid authorization header format")
+			AbortWithError(c, http.StatusUnauthorized, "invalid authorization header format")
 			return
 		}
 
 		claims, err := jwtService.ValidateAccessToken(parts[1])
 		if err != nil {
 			if err == domain.ErrExpiredToken {
-				handler.AbortWithError(c, http.StatusUnauthorized, "token has expired")
+				AbortWithError(c, http.StatusUnauthorized, "token has expired")
 			} else {
-				handler.AbortWithError(c, http.StatusUnauthorized, "invalid token")
+				AbortWithError(c, http.StatusUnauthorized, "invalid token")
 			}
 			return
 		}
 
 		userID, err := uuid.Parse(claims.UserID)
 		if err != nil {
-			handler.AbortWithError(c, http.StatusUnauthorized, "invalid token claims")
+			AbortWithError(c, http.StatusUnauthorized, "invalid token claims")
 			return
 		}
 
@@ -61,16 +60,16 @@ func RequireRole(roles ...domain.Role) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		role, exists := c.Get(ContextRole)
 		if !exists {
-			handler.AbortWithError(c, http.StatusUnauthorized, "unauthorized")
+			AbortWithError(c, http.StatusUnauthorized, "unauthorized")
 			return
 		}
 		userRole, ok := role.(domain.Role)
 		if !ok {
-			handler.AbortWithError(c, http.StatusInternalServerError, "internal server error")
+			AbortWithError(c, http.StatusInternalServerError, "internal server error")
 			return
 		}
 		if _, ok := allowed[userRole]; !ok {
-			handler.AbortWithError(c, http.StatusForbidden, "forbidden: insufficient permissions")
+			AbortWithError(c, http.StatusForbidden, "forbidden: insufficient permissions")
 			return
 		}
 		c.Next()
