@@ -10,7 +10,6 @@ Built with Go · Gin · PostgreSQL · Clean Architecture
 [![Gin](https://img.shields.io/badge/Gin-1.10-008ECF?style=flat)](https://github.com/gin-gonic/gin)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?style=flat&logo=postgresql)](https://www.postgresql.org/)
 [![JWT](https://img.shields.io/badge/JWT-golang--jwt%2Fv5-F7B93E?style=flat)](https://github.com/golang-jwt/jwt)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat)](LICENSE)
 
 </div>
 
@@ -89,9 +88,6 @@ auth-service/
 │   ├── config/config.go             # Env-based config
 │   ├── hasher/hasher.go             # bcrypt + SHA-256
 │   └── email/email.go               # SMTP sender
-├── migrations/                      # SQL migration files
-├── docker-compose.yml
-├── Dockerfile
 ├── Makefile
 └── .env.example
 ```
@@ -103,8 +99,7 @@ auth-service/
 ### Prerequisites
 
 - Go 1.22+
-- PostgreSQL 13+ (or Docker)
-- `golang-migrate` CLI *(optional, for migrations)*
+- PostgreSQL 13+
 
 ### 1. Clone & Install
 
@@ -140,28 +135,9 @@ SMTP_PORT=587
 SMTP_USER=your@gmail.com
 SMTP_PASSWORD=your-app-password
 SMTP_FROM=your@gmail.com
-```
 
-> 💡 If `SMTP_PASSWORD` is empty, verification emails are printed to stdout — useful for local development.
 
-### 3. Start PostgreSQL
-
-```bash
-docker-compose up -d postgres
-```
-
-### 4. Run Migrations
-
-```bash
-# Using golang-migrate
-make migrate-up
-
-# Or run SQL files manually in order:
-# migrations/000001_create_users.up.sql
-# migrations/000002_create_refresh_tokens.up.sql
-```
-
-### 5. Run the Server
+### Run the Server
 
 ```bash
 go run ./cmd/api/main.go
@@ -301,34 +277,6 @@ curl -X POST http://localhost:8080/api/v1/auth/logout \
 | `SMTP_PASSWORD` | ❌ | — | SMTP password (empty = print to stdout) |
 | `SMTP_FROM` | ❌ | — | Sender email address |
 
----
-
-## 🐳 Docker
-
-```bash
-# Start everything (app + postgres)
-docker-compose up -d
-
-# App only (postgres must be running)
-docker build -t auth-service .
-docker run --env-file .env -p 8080:8080 auth-service
-```
-
----
-
-## 🛠️ Makefile Commands
-
-```bash
-make run           # Run the application
-make build         # Build binary to ./bin/api
-make tidy          # Download and tidy dependencies
-make docker-up     # Start Docker containers
-make docker-down   # Stop Docker containers
-make migrate-up    # Apply all migrations
-make migrate-down  # Rollback all migrations
-```
-
----
 
 ## 🧱 Tech Stack
 
@@ -342,10 +290,5 @@ make migrate-down  # Rollback all migrations
 | Password Hashing | bcrypt (cost 12) |
 | UUID | google/uuid |
 | Config | godotenv |
-| Containerization | Docker + Docker Compose |
 
 ---
-
-## 📄 License
-
-MIT License — see [LICENSE](LICENSE) for details.
